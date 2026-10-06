@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Бренд-стратегия — Тутков/Будков</title>
+<meta name="description" content="Портфолио агентства Тутков/Будков по бренд-стратегиям.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #0b0b0c;
+    --slide-bg: #0b0b0c;
+    --accent: #ffffff;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+
+  /* scroll-snap container */
+  .scroller {
+    scroll-snap-type: y proximity;
+  }
+  .deck {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .slide {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: var(--slide-bg);
+    overflow: hidden;
+    scroll-snap-align: start;
+    scroll-margin-top: 64px;
+  }
+  .slide img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  .slide.has-video img {
+    transition: transform 0.35s ease, filter 0.35s ease;
+  }
+  .slide.has-video:hover img {
+    transform: scale(1.015);
+    filter: brightness(1.05);
+  }
+  .hotspot {
+    position: absolute;
+    border: none;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    display: block;
+  }
+  .hotspot-video { -webkit-tap-highlight-color: transparent; }
+  .hotspot-link { -webkit-tap-highlight-color: transparent; }
+
+  /* top progress hairline */
+  .topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    z-index: 60;
+  }
+  .topbar-fill {
+    height: 100%;
+    width: 0%;
+    background: #fff;
+    transition: width 0.1s linear;
+  }
+
+  /* sticky chapter nav */
+  .chapternav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 28px;
+    padding: 16px 28px;
+    background: rgba(11,11,12,0.72);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .brand {
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    font-size: 13px;
+    white-space: nowrap;
+    opacity: 0.9;
+    padding-right: 8px;
+    border-right: 1px solid rgba(255,255,255,0.15);
+  }
+  .chapter-item {
+    position: relative;
+  }
+  .chapter-link {
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    font-size: 13px;
+    white-space: nowrap;
+    padding: 6px 2px;
+    position: relative;
+    display: inline-block;
+    transition: color 0.2s ease;
+  }
+  .chapter-link::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 100%;
+    bottom: -1px;
+    height: 2px;
+    background: #fff;
+    transition: right 0.25s ease;
+  }
+
+  /* hover dropdown of individual cases within a chapter (desktop/pointer only) */
+  .chapter-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    /* no gap to the menu item above: a real empty strip there would drop :hover
+       mid-transition and make the dropdown vanish while the cursor is still moving */
+    margin-top: 0;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    min-width: 260px;
+    border-radius: 10px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+  }
+  .chapter-dropdown-inner {
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    border-radius: 10px;
+    background: rgba(18,18,20,0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+  }
+  .chapter-sub-link {
+    color: rgba(255,255,255,0.68);
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 1.4;
+    white-space: nowrap;
+    padding: 7px 10px;
+    border-radius: 6px;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .chapter-sub-client {
+    color: rgba(255,255,255,0.45);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+  }
+  .chapter-sub-link:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+  }
+  .chapter-sub-link:hover .chapter-sub-client {
+    color: rgba(255,255,255,0.7);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .chapter-item:hover .chapter-dropdown {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+  }
+  .chapter-link:hover { color: rgba(255,255,255,0.85); }
+  .chapter-link.active { color: #fff; }
+  .chapter-link.active::after { right: 0; }
+
+  /* floating slide counter / prev-next */
+  .slidenav {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.18);
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .slidenav.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .slidenav button {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .slidenav button:hover { background: rgba(255,255,255,0.15); }
+  .slidenav button:disabled { opacity: 0.3; cursor: default; }
+  .slidenav button:disabled:hover { background: transparent; }
+  .slide-counter {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255,255,255,0.8);
+    min-width: 62px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* inline video playback (replaces the slide image in place) */
+  .slide-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    z-index: 5;
+    background: #000;
+  }
+  .slide-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 6;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #fff;
+    font-size: 20px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .slide-close:hover { background: rgba(0,0,0,0.75); }
+
+  @media (max-width: 700px) {
+    .chapternav { gap: 18px; padding: 12px 16px; }
+    .brand { display: none; }
+  }
+
+  .chapternav { gap: 4px 22px; }
+  .chapter-sub-link { white-space: normal; max-width: 340px; }
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="topbar-fill" id="topbarFill"></div></div>
+
+<nav class="chapternav">
+  <span class="brand">ТУТКОВБУДКОВ</span>
+  <div class="chapter-item">
+      <a href="#page-2" class="chapter-link" data-chapter-idx="0">MyMuse</a>
+      <div class="chapter-dropdown">
+        <div class="chapter-dropdown-inner">
+          <a href="#desc-01" class="chapter-sub-link">Описание проекта</a>
+          <a href="#page-6" class="chapter-sub-link">Ситуация и задача</a>
+          <a href="#page-14" class="chapter-sub-link">Анализ аудитории</a>
+          <a href="#page-19" class="chapter-sub-link">Анализ конкурентов</a>
+          <a href="#page-24" class="chapter-sub-link">Гипотезы позиционирования</a>
+        </div>
+      </div>
+    </div>
+  <div class="chapter-item">
+      <a href="#page-27" class="chapter-link" data-chapter-idx="1">Рыбшеф</a>
+      <div class="chapter-dropdown">
+        <div class="chapter-dropdown-inner">
+          <a href="#desc-02" class="chapter-sub-link">Описание проекта</a>
+          <a href="#page-30" class="chapter-sub-link">Список конкурентов</a>
+          <a href="#page-32" class="chapter-sub-link">Анализ коммуникации конкурентов</a>
+          <a href="#page-35" class="chapter-sub-link">Выводы</a>
+          <a href="#page-43" class="chapter-sub-link">Анализ трендов</a>
+          <a href="#page-51" class="chapter-sub-link">Анализ целевой аудитории</a>
+          <a href="#page-53" class="chapter-sub-link">Стратегия бренда (NDA)</a>
+        </div>
+      </div>
+    </div>
+  <div class="chapter-item">
+      <a href="#page-54" class="chapter-link" data-chapter-idx="2">Сушивёсла</a>
+      <div class="chapter-dropdown">
+        <div class="chapter-dropdown-inner">
+          <a href="#desc-03" class="chapter-sub-link">Описание проекта</a>
+          <a href="#page-56" class="chapter-sub-link">О бренде</a>
+          <a href="#page-60" class="chapter-sub-link">О рынке</a>
+          <a href="#page-68" class="chapter-sub-link">О людях</a>
+          <a href="#page-73" class="chapter-sub-link">Общие выводы</a>
+          <a href="#page-79" class="chapter-sub-link">Идея позиционирования</a>
+        </div>
+      </div>
+    </div>
+  <div class="chapter-item">
+      <a href="#page-84" class="chapter-link" data-chapter-idx="3">Апельсин</a>
+      <div class="chapter-dropdown">
+        <div class="chapter-dropdown-inner">
+          <a href="#desc-04" class="chapter-sub-link">Описание проекта</a>
+          <a href="#page-89" class="chapter-sub-link">Резюме брифа</a>
+          <a href="#page-96" class="chapter-sub-link">Международные практики и аудитория</a>
+          <a href="#page-98" class="chapter-sub-link">Конкурентное окружение</a>
+          <a href="#page-104" class="chapter-sub-link">Гипотезы позиционирования</a>
+        </div>
+      </div>
+    </div>
+  <div class="chapter-item">
+      <a href="#page-106" class="chapter-link" data-chapter-idx="4">Пятёрочка</a>
+      <div class="chapter-dropdown">
+        <div class="chapter-dropdown-inner">
+          <a href="#desc-05" class="chapter-sub-link">Описание проекта</a>
+          <a href="#page-110" class="chapter-sub-link">Как формируется доверие</a>
+          <a href="#page-120" class="chapter-sub-link">Направление 1 — доверие к человеку</a>
+          <a href="#page-121" class="chapter-sub-link">Направление 2 — другое доверие</a>
+          <a href="#page-122" class="chapter-sub-link">Направление 3 — искренность</a>
+          <a href="#page-123" class="chapter-sub-link">Направление 4 — свежесть</a>
+          <a href="#page-124" class="chapter-sub-link">Summary</a>
+        </div>
+      </div>
+    </div>
+  <div class="chapter-item">
+      <a href="#page-125" class="chapter-link" data-chapter-idx="5">М.Видео</a>
+      <div class="chapter-dropdown">
+        <div class="chapter-dropdown-inner">
+          <a href="#desc-06" class="chapter-sub-link">Описание проекта</a>
+          <a href="#page-127" class="chapter-sub-link">Задачи</a>
+          <a href="#page-131" class="chapter-sub-link">Аудитория и потребности</a>
+          <a href="#page-139" class="chapter-sub-link">Конкуренты</a>
+          <a href="#page-144" class="chapter-sub-link">Тренды в retail</a>
+          <a href="#page-148" class="chapter-sub-link">Идея и манифест бренда</a>
+          <a href="#page-151" class="chapter-sub-link">Платформа и принципы</a>
+        </div>
+      </div>
+    </div>
+  <div class="chapter-item">
+      <a href="#page-156" class="chapter-link" data-chapter-idx="6">Askona</a>
+      <div class="chapter-dropdown">
+        <div class="chapter-dropdown-inner">
+          <a href="#desc-07" class="chapter-sub-link">Описание проекта</a>
+          <a href="#page-158" class="chapter-sub-link">Задачи</a>
+          <a href="#page-160" class="chapter-sub-link">Аудит бренда</a>
+          <a href="#page-170" class="chapter-sub-link">Целевая аудитория</a>
+          <a href="#page-172" class="chapter-sub-link">Тренды</a>
+          <a href="#page-174" class="chapter-sub-link">Конкурентное окружение</a>
+          <a href="#page-186" class="chapter-sub-link">Мировые практики</a>
+          <a href="#page-192" class="chapter-sub-link">Платформа</a>
+        </div>
+      </div>
+    </div>
+  <div class="chapter-item">
+      <a href="#page-196" class="chapter-link" data-chapter-idx="7">Иви</a>
+      <div class="chapter-dropdown">
+        <div class="chapter-dropdown-inner">
+          <a href="#desc-08" class="chapter-sub-link">Описание проекта</a>
+          <a href="#page-198" class="chapter-sub-link">Цели</a>
+          <a href="#page-204" class="chapter-sub-link">Тренды</a>
+          <a href="#page-205" class="chapter-sub-link">Выводы</a>
+          <a href="#page-209" class="chapter-sub-link">Гипотезы ценностного предложения</a>
+          <a href="#page-214" class="chapter-sub-link">Резюме</a>
+        </div>
+      </div>
+    </div>
+  <div class="chapter-item">
+      <a href="#page-217" class="chapter-link" data-chapter-idx="8">Bereke Bank</a>
+      <div class="chapter-dropdown">
+        <div class="chapter-dropdown-inner">
+          <a href="#desc-09" class="chapter-sub-link">Описание проекта</a>
+          <a href="#page-220" class="chapter-sub-link">Ситуация и продукт</a>
+          <a href="#page-226" class="chapter-sub-link">Аудитория и тенденции</a>
+          <a href="#page-232" class="chapter-sub-link">Конкурентный контекст</a>
+          <a href="#page-239" class="chapter-sub-link">Идея позиционирования</a>
+        </div>
+      </div>
+    </div>
+</nav>
+
+<div class="scroller">
+<div class="deck">
+    <section class="slide" id="page-1" data-page="1" data-chapter="-1">
+      <img src="img/page-001.jpg" alt="Слайд 1" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-2" data-page="2" data-chapter="0">
+      <img src="img/page-002.jpg" alt="Слайд 2" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="desc-01" data-page="desc-01" data-chapter="0">
+      <img src="img/desc-01.jpg" alt="Описание проекта MyMuse" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-4" data-page="4" data-chapter="0">
+      <img src="img/page-004.jpg" alt="Слайд 4" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-5" data-page="5" data-chapter="0">
+      <img src="img/page-005.jpg" alt="Слайд 5" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-6" data-page="6" data-chapter="0">
+      <img src="img/page-006.jpg" alt="Слайд 6" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-7" data-page="7" data-chapter="0">
+      <img src="img/page-007.jpg" alt="Слайд 7" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-8" data-page="8" data-chapter="0">
+      <img src="img/page-008.jpg" alt="Слайд 8" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-9" data-page="9" data-chapter="0">
+      <img src="img/page-009.jpg" alt="Слайд 9" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-10" data-page="10" data-chapter="0">
+      <img src="img/page-010.jpg" alt="Слайд 10" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-11" data-page="11" data-chapter="0">
+      <img src="img/page-011.jpg" alt="Слайд 11" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-12" data-page="12" data-chapter="0">
+      <img src="img/page-012.jpg" alt="Слайд 12" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-13" data-page="13" data-chapter="0">
+      <img src="img/page-013.jpg" alt="Слайд 13" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-14" data-page="14" data-chapter="0">
+      <img src="img/page-014.jpg" alt="Слайд 14" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-15" data-page="15" data-chapter="0">
+      <img src="img/page-015.jpg" alt="Слайд 15" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-16" data-page="16" data-chapter="0">
+      <img src="img/page-016.jpg" alt="Слайд 16" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-17" data-page="17" data-chapter="0">
+      <img src="img/page-017.jpg" alt="Слайд 17" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-18" data-page="18" data-chapter="0">
+      <img src="img/page-018.jpg" alt="Слайд 18" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-19" data-page="19" data-chapter="0">
+      <img src="img/page-019.jpg" alt="Слайд 19" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-20" data-page="20" data-chapter="0">
+      <img src="img/page-020.jpg" alt="Слайд 20" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-21" data-page="21" data-chapter="0">
+      <img src="img/page-021.jpg" alt="Слайд 21" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-22" data-page="22" data-chapter="0">
+      <img src="img/page-022.jpg" alt="Слайд 22" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-23" data-page="23" data-chapter="0">
+      <img src="img/page-023.jpg" alt="Слайд 23" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-24" data-page="24" data-chapter="0">
+      <img src="img/page-024.jpg" alt="Слайд 24" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-25" data-page="25" data-chapter="0">
+      <img src="img/page-025.jpg" alt="Слайд 25" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-26" data-page="26" data-chapter="0">
+      <img src="img/page-026.jpg" alt="Слайд 26" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-27" data-page="27" data-chapter="1">
+      <img src="img/page-027.jpg" alt="Слайд 27" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="desc-02" data-page="desc-02" data-chapter="1">
+      <img src="img/desc-02.jpg" alt="Описание проекта Рыбшеф" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-29" data-page="29" data-chapter="1">
+      <img src="img/page-029.jpg" alt="Слайд 29" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-30" data-page="30" data-chapter="1">
+      <img src="img/page-030.jpg" alt="Слайд 30" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-31" data-page="31" data-chapter="1">
+      <img src="img/page-031.jpg" alt="Слайд 31" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-32" data-page="32" data-chapter="1">
+      <img src="img/page-032.jpg" alt="Слайд 32" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-33" data-page="33" data-chapter="1">
+      <img src="img/page-033.jpg" alt="Слайд 33" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-34" data-page="34" data-chapter="1">
+      <img src="img/page-034.jpg" alt="Слайд 34" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-35" data-page="35" data-chapter="1">
+      <img src="img/page-035.jpg" alt="Слайд 35" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-36" data-page="36" data-chapter="1">
+      <img src="img/page-036.jpg" alt="Слайд 36" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-37" data-page="37" data-chapter="1">
+      <img src="img/page-037.jpg" alt="Слайд 37" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-38" data-page="38" data-chapter="1">
+      <img src="img/page-038.jpg" alt="Слайд 38" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-39" data-page="39" data-chapter="1">
+      <img src="img/page-039.jpg" alt="Слайд 39" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-40" data-page="40" data-chapter="1">
+      <img src="img/page-040.jpg" alt="Слайд 40" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-41" data-page="41" data-chapter="1">
+      <img src="img/page-041.jpg" alt="Слайд 41" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-42" data-page="42" data-chapter="1">
+      <img src="img/page-042.jpg" alt="Слайд 42" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-43" data-page="43" data-chapter="1">
+      <img src="img/page-043.jpg" alt="Слайд 43" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-44" data-page="44" data-chapter="1">
+      <img src="img/page-044.jpg" alt="Слайд 44" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-45" data-page="45" data-chapter="1">
+      <img src="img/page-045.jpg" alt="Слайд 45" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-46" data-page="46" data-chapter="1">
+      <img src="img/page-046.jpg" alt="Слайд 46" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-47" data-page="47" data-chapter="1">
+      <img src="img/page-047.jpg" alt="Слайд 47" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-48" data-page="48" data-chapter="1">
+      <img src="img/page-048.jpg" alt="Слайд 48" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-49" data-page="49" data-chapter="1">
+      <img src="img/page-049.jpg" alt="Слайд 49" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-50" data-page="50" data-chapter="1">
+      <img src="img/page-050.jpg" alt="Слайд 50" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-51" data-page="51" data-chapter="1">
+      <img src="img/page-051.jpg" alt="Слайд 51" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-52" data-page="52" data-chapter="1">
+      <img src="img/page-052.jpg" alt="Слайд 52" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-53" data-page="53" data-chapter="1">
+      <img src="img/page-053.jpg" alt="Слайд 53" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-54" data-page="54" data-chapter="2">
+      <img src="img/page-054.jpg" alt="Слайд 54" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="desc-03" data-page="desc-03" data-chapter="2">
+      <img src="img/desc-03.jpg" alt="Описание проекта Сушивёсла" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-56" data-page="56" data-chapter="2">
+      <img src="img/page-056.jpg" alt="Слайд 56" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-57" data-page="57" data-chapter="2">
+      <img src="img/page-057.jpg" alt="Слайд 57" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-58" data-page="58" data-chapter="2">
+      <img src="img/page-058.jpg" alt="Слайд 58" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-59" data-page="59" data-chapter="2">
+      <img src="img/page-059.jpg" alt="Слайд 59" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-60" data-page="60" data-chapter="2">
+      <img src="img/page-060.jpg" alt="Слайд 60" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-61" data-page="61" data-chapter="2">
+      <img src="img/page-061.jpg" alt="Слайд 61" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-62" data-page="62" data-chapter="2">
+      <img src="img/page-062.jpg" alt="Слайд 62" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-63" data-page="63" data-chapter="2">
+      <img src="img/page-063.jpg" alt="Слайд 63" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-64" data-page="64" data-chapter="2">
+      <img src="img/page-064.jpg" alt="Слайд 64" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-65" data-page="65" data-chapter="2">
+      <img src="img/page-065.jpg" alt="Слайд 65" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-66" data-page="66" data-chapter="2">
+      <img src="img/page-066.jpg" alt="Слайд 66" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-67" data-page="67" data-chapter="2">
+      <img src="img/page-067.jpg" alt="Слайд 67" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-68" data-page="68" data-chapter="2">
+      <img src="img/page-068.jpg" alt="Слайд 68" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-69" data-page="69" data-chapter="2">
+      <img src="img/page-069.jpg" alt="Слайд 69" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-70" data-page="70" data-chapter="2">
+      <img src="img/page-070.jpg" alt="Слайд 70" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-71" data-page="71" data-chapter="2">
+      <img src="img/page-071.jpg" alt="Слайд 71" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-72" data-page="72" data-chapter="2">
+      <img src="img/page-072.jpg" alt="Слайд 72" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-73" data-page="73" data-chapter="2">
+      <img src="img/page-073.jpg" alt="Слайд 73" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-74" data-page="74" data-chapter="2">
+      <img src="img/page-074.jpg" alt="Слайд 74" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-75" data-page="75" data-chapter="2">
+      <img src="img/page-075.jpg" alt="Слайд 75" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-76" data-page="76" data-chapter="2">
+      <img src="img/page-076.jpg" alt="Слайд 76" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-77" data-page="77" data-chapter="2">
+      <img src="img/page-077.jpg" alt="Слайд 77" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-78" data-page="78" data-chapter="2">
+      <img src="img/page-078.jpg" alt="Слайд 78" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-79" data-page="79" data-chapter="2">
+      <img src="img/page-079.jpg" alt="Слайд 79" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-80" data-page="80" data-chapter="2">
+      <img src="img/page-080.jpg" alt="Слайд 80" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-81" data-page="81" data-chapter="2">
+      <img src="img/page-081.jpg" alt="Слайд 81" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-82" data-page="82" data-chapter="2">
+      <img src="img/page-082.jpg" alt="Слайд 82" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-83" data-page="83" data-chapter="2">
+      <img src="img/page-083.jpg" alt="Слайд 83" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-84" data-page="84" data-chapter="3">
+      <img src="img/page-084.jpg" alt="Слайд 84" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="desc-04" data-page="desc-04" data-chapter="3">
+      <img src="img/desc-04.jpg" alt="Описание проекта Апельсин" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-86" data-page="86" data-chapter="3">
+      <img src="img/page-086.jpg" alt="Слайд 86" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-87" data-page="87" data-chapter="3">
+      <img src="img/page-087.jpg" alt="Слайд 87" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-88" data-page="88" data-chapter="3">
+      <img src="img/page-088.jpg" alt="Слайд 88" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-89" data-page="89" data-chapter="3">
+      <img src="img/page-089.jpg" alt="Слайд 89" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-90" data-page="90" data-chapter="3">
+      <img src="img/page-090.jpg" alt="Слайд 90" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-91" data-page="91" data-chapter="3">
+      <img src="img/page-091.jpg" alt="Слайд 91" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-92" data-page="92" data-chapter="3">
+      <img src="img/page-092.jpg" alt="Слайд 92" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-93" data-page="93" data-chapter="3">
+      <img src="img/page-093.jpg" alt="Слайд 93" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-94" data-page="94" data-chapter="3">
+      <img src="img/page-094.jpg" alt="Слайд 94" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-95" data-page="95" data-chapter="3">
+      <img src="img/page-095.jpg" alt="Слайд 95" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-96" data-page="96" data-chapter="3">
+      <img src="img/page-096.jpg" alt="Слайд 96" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-97" data-page="97" data-chapter="3">
+      <img src="img/page-097.jpg" alt="Слайд 97" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-98" data-page="98" data-chapter="3">
+      <img src="img/page-098.jpg" alt="Слайд 98" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-99" data-page="99" data-chapter="3">
+      <img src="img/page-099.jpg" alt="Слайд 99" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-100" data-page="100" data-chapter="3">
+      <img src="img/page-100.jpg" alt="Слайд 100" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-101" data-page="101" data-chapter="3">
+      <img src="img/page-101.jpg" alt="Слайд 101" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-102" data-page="102" data-chapter="3">
+      <img src="img/page-102.jpg" alt="Слайд 102" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-103" data-page="103" data-chapter="3">
+      <img src="img/page-103.jpg" alt="Слайд 103" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-104" data-page="104" data-chapter="3">
+      <img src="img/page-104.jpg" alt="Слайд 104" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-105" data-page="105" data-chapter="3">
+      <img src="img/page-105.jpg" alt="Слайд 105" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-106" data-page="106" data-chapter="4">
+      <img src="img/page-106.jpg" alt="Слайд 106" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="desc-05" data-page="desc-05" data-chapter="4">
+      <img src="img/desc-05.jpg" alt="Описание проекта Пятёрочка" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-108" data-page="108" data-chapter="4">
+      <img src="img/page-108.jpg" alt="Слайд 108" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-109" data-page="109" data-chapter="4">
+      <img src="img/page-109.jpg" alt="Слайд 109" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-110" data-page="110" data-chapter="4">
+      <img src="img/page-110.jpg" alt="Слайд 110" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-111" data-page="111" data-chapter="4">
+      <img src="img/page-111.jpg" alt="Слайд 111" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-112" data-page="112" data-chapter="4">
+      <img src="img/page-112.jpg" alt="Слайд 112" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-113" data-page="113" data-chapter="4">
+      <img src="img/page-113.jpg" alt="Слайд 113" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-114" data-page="114" data-chapter="4">
+      <img src="img/page-114.jpg" alt="Слайд 114" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-115" data-page="115" data-chapter="4">
+      <img src="img/page-115.jpg" alt="Слайд 115" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-116" data-page="116" data-chapter="4">
+      <img src="img/page-116.jpg" alt="Слайд 116" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-117" data-page="117" data-chapter="4">
+      <img src="img/page-117.jpg" alt="Слайд 117" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-118" data-page="118" data-chapter="4">
+      <img src="img/page-118.jpg" alt="Слайд 118" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-119" data-page="119" data-chapter="4">
+      <img src="img/page-119.jpg" alt="Слайд 119" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-120" data-page="120" data-chapter="4">
+      <img src="img/page-120.jpg" alt="Слайд 120" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-121" data-page="121" data-chapter="4">
+      <img src="img/page-121.jpg" alt="Слайд 121" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-122" data-page="122" data-chapter="4">
+      <img src="img/page-122.jpg" alt="Слайд 122" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-123" data-page="123" data-chapter="4">
+      <img src="img/page-123.jpg" alt="Слайд 123" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-124" data-page="124" data-chapter="4">
+      <img src="img/page-124.jpg" alt="Слайд 124" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-125" data-page="125" data-chapter="5">
+      <img src="img/page-125.jpg" alt="Слайд 125" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="desc-06" data-page="desc-06" data-chapter="5">
+      <img src="img/desc-06.jpg" alt="Описание проекта М.Видео" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-127" data-page="127" data-chapter="5">
+      <img src="img/page-127.jpg" alt="Слайд 127" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-128" data-page="128" data-chapter="5">
+      <img src="img/page-128.jpg" alt="Слайд 128" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-129" data-page="129" data-chapter="5">
+      <img src="img/page-129.jpg" alt="Слайд 129" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-130" data-page="130" data-chapter="5">
+      <img src="img/page-130.jpg" alt="Слайд 130" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-131" data-page="131" data-chapter="5">
+      <img src="img/page-131.jpg" alt="Слайд 131" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-132" data-page="132" data-chapter="5">
+      <img src="img/page-132.jpg" alt="Слайд 132" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-133" data-page="133" data-chapter="5">
+      <img src="img/page-133.jpg" alt="Слайд 133" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-134" data-page="134" data-chapter="5">
+      <img src="img/page-134.jpg" alt="Слайд 134" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-135" data-page="135" data-chapter="5">
+      <img src="img/page-135.jpg" alt="Слайд 135" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-136" data-page="136" data-chapter="5">
+      <img src="img/page-136.jpg" alt="Слайд 136" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-137" data-page="137" data-chapter="5">
+      <img src="img/page-137.jpg" alt="Слайд 137" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-138" data-page="138" data-chapter="5">
+      <img src="img/page-138.jpg" alt="Слайд 138" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-139" data-page="139" data-chapter="5">
+      <img src="img/page-139.jpg" alt="Слайд 139" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-140" data-page="140" data-chapter="5">
+      <img src="img/page-140.jpg" alt="Слайд 140" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-141" data-page="141" data-chapter="5">
+      <img src="img/page-141.jpg" alt="Слайд 141" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-142" data-page="142" data-chapter="5">
+      <img src="img/page-142.jpg" alt="Слайд 142" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-143" data-page="143" data-chapter="5">
+      <img src="img/page-143.jpg" alt="Слайд 143" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-144" data-page="144" data-chapter="5">
+      <img src="img/page-144.jpg" alt="Слайд 144" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-145" data-page="145" data-chapter="5">
+      <img src="img/page-145.jpg" alt="Слайд 145" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-146" data-page="146" data-chapter="5">
+      <img src="img/page-146.jpg" alt="Слайд 146" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-147" data-page="147" data-chapter="5">
+      <img src="img/page-147.jpg" alt="Слайд 147" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-148" data-page="148" data-chapter="5">
+      <img src="img/page-148.jpg" alt="Слайд 148" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-149" data-page="149" data-chapter="5">
+      <img src="img/page-149.jpg" alt="Слайд 149" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-150" data-page="150" data-chapter="5">
+      <img src="img/page-150.jpg" alt="Слайд 150" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-151" data-page="151" data-chapter="5">
+      <img src="img/page-151.jpg" alt="Слайд 151" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-152" data-page="152" data-chapter="5">
+      <img src="img/page-152.jpg" alt="Слайд 152" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-153" data-page="153" data-chapter="5">
+      <img src="img/page-153.jpg" alt="Слайд 153" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-154" data-page="154" data-chapter="5">
+      <img src="img/page-154.jpg" alt="Слайд 154" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-155" data-page="155" data-chapter="5">
+      <img src="img/page-155.jpg" alt="Слайд 155" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-156" data-page="156" data-chapter="6">
+      <img src="img/page-156.jpg" alt="Слайд 156" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="desc-07" data-page="desc-07" data-chapter="6">
+      <img src="img/desc-07.jpg" alt="Описание проекта Askona" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-158" data-page="158" data-chapter="6">
+      <img src="img/page-158.jpg" alt="Слайд 158" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-159" data-page="159" data-chapter="6">
+      <img src="img/page-159.jpg" alt="Слайд 159" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-160" data-page="160" data-chapter="6">
+      <img src="img/page-160.jpg" alt="Слайд 160" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-161" data-page="161" data-chapter="6">
+      <img src="img/page-161.jpg" alt="Слайд 161" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-162" data-page="162" data-chapter="6">
+      <img src="img/page-162.jpg" alt="Слайд 162" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-163" data-page="163" data-chapter="6">
+      <img src="img/page-163.jpg" alt="Слайд 163" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-164" data-page="164" data-chapter="6">
+      <img src="img/page-164.jpg" alt="Слайд 164" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-165" data-page="165" data-chapter="6">
+      <img src="img/page-165.jpg" alt="Слайд 165" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-166" data-page="166" data-chapter="6">
+      <img src="img/page-166.jpg" alt="Слайд 166" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-167" data-page="167" data-chapter="6">
+      <img src="img/page-167.jpg" alt="Слайд 167" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-168" data-page="168" data-chapter="6">
+      <img src="img/page-168.jpg" alt="Слайд 168" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-169" data-page="169" data-chapter="6">
+      <img src="img/page-169.jpg" alt="Слайд 169" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-170" data-page="170" data-chapter="6">
+      <img src="img/page-170.jpg" alt="Слайд 170" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-171" data-page="171" data-chapter="6">
+      <img src="img/page-171.jpg" alt="Слайд 171" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-172" data-page="172" data-chapter="6">
+      <img src="img/page-172.jpg" alt="Слайд 172" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-173" data-page="173" data-chapter="6">
+      <img src="img/page-173.jpg" alt="Слайд 173" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-174" data-page="174" data-chapter="6">
+      <img src="img/page-174.jpg" alt="Слайд 174" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-175" data-page="175" data-chapter="6">
+      <img src="img/page-175.jpg" alt="Слайд 175" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-176" data-page="176" data-chapter="6">
+      <img src="img/page-176.jpg" alt="Слайд 176" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-177" data-page="177" data-chapter="6">
+      <img src="img/page-177.jpg" alt="Слайд 177" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-178" data-page="178" data-chapter="6">
+      <img src="img/page-178.jpg" alt="Слайд 178" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-179" data-page="179" data-chapter="6">
+      <img src="img/page-179.jpg" alt="Слайд 179" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-180" data-page="180" data-chapter="6">
+      <img src="img/page-180.jpg" alt="Слайд 180" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-181" data-page="181" data-chapter="6">
+      <img src="img/page-181.jpg" alt="Слайд 181" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-182" data-page="182" data-chapter="6">
+      <img src="img/page-182.jpg" alt="Слайд 182" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-183" data-page="183" data-chapter="6">
+      <img src="img/page-183.jpg" alt="Слайд 183" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-184" data-page="184" data-chapter="6">
+      <img src="img/page-184.jpg" alt="Слайд 184" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-185" data-page="185" data-chapter="6">
+      <img src="img/page-185.jpg" alt="Слайд 185" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-186" data-page="186" data-chapter="6">
+      <img src="img/page-186.jpg" alt="Слайд 186" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-187" data-page="187" data-chapter="6">
+      <img src="img/page-187.jpg" alt="Слайд 187" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-188" data-page="188" data-chapter="6">
+      <img src="img/page-188.jpg" alt="Слайд 188" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-189" data-page="189" data-chapter="6">
+      <img src="img/page-189.jpg" alt="Слайд 189" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-190" data-page="190" data-chapter="6">
+      <img src="img/page-190.jpg" alt="Слайд 190" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-191" data-page="191" data-chapter="6">
+      <img src="img/page-191.jpg" alt="Слайд 191" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-192" data-page="192" data-chapter="6">
+      <img src="img/page-192.jpg" alt="Слайд 192" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-193" data-page="193" data-chapter="6">
+      <img src="img/page-193.jpg" alt="Слайд 193" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-194" data-page="194" data-chapter="6">
+      <img src="img/page-194.jpg" alt="Слайд 194" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-195" data-page="195" data-chapter="6">
+      <img src="img/page-195.jpg" alt="Слайд 195" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-196" data-page="196" data-chapter="7">
+      <img src="img/page-196.jpg" alt="Слайд 196" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="desc-08" data-page="desc-08" data-chapter="7">
+      <img src="img/desc-08.jpg" alt="Описание проекта Иви" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-198" data-page="198" data-chapter="7">
+      <img src="img/page-198.jpg" alt="Слайд 198" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-199" data-page="199" data-chapter="7">
+      <img src="img/page-199.jpg" alt="Слайд 199" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-200" data-page="200" data-chapter="7">
+      <img src="img/page-200.jpg" alt="Слайд 200" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-201" data-page="201" data-chapter="7">
+      <img src="img/page-201.jpg" alt="Слайд 201" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-202" data-page="202" data-chapter="7">
+      <img src="img/page-202.jpg" alt="Слайд 202" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-203" data-page="203" data-chapter="7">
+      <img src="img/page-203.jpg" alt="Слайд 203" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-204" data-page="204" data-chapter="7">
+      <img src="img/page-204.jpg" alt="Слайд 204" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-205" data-page="205" data-chapter="7">
+      <img src="img/page-205.jpg" alt="Слайд 205" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-206" data-page="206" data-chapter="7">
+      <img src="img/page-206.jpg" alt="Слайд 206" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-207" data-page="207" data-chapter="7">
+      <img src="img/page-207.jpg" alt="Слайд 207" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-208" data-page="208" data-chapter="7">
+      <img src="img/page-208.jpg" alt="Слайд 208" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-209" data-page="209" data-chapter="7">
+      <img src="img/page-209.jpg" alt="Слайд 209" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-210" data-page="210" data-chapter="7">
+      <img src="img/page-210.jpg" alt="Слайд 210" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-211" data-page="211" data-chapter="7">
+      <img src="img/page-211.jpg" alt="Слайд 211" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-212" data-page="212" data-chapter="7">
+      <img src="img/page-212.jpg" alt="Слайд 212" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-213" data-page="213" data-chapter="7">
+      <img src="img/page-213.jpg" alt="Слайд 213" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-214" data-page="214" data-chapter="7">
+      <img src="img/page-214.jpg" alt="Слайд 214" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-215" data-page="215" data-chapter="7">
+      <img src="img/page-215.jpg" alt="Слайд 215" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-216" data-page="216" data-chapter="7">
+      <img src="img/page-216.jpg" alt="Слайд 216" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-217" data-page="217" data-chapter="8">
+      <img src="img/page-217.jpg" alt="Слайд 217" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="desc-09" data-page="desc-09" data-chapter="8">
+      <img src="img/desc-09.jpg" alt="Описание проекта Bereke Bank" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-219" data-page="219" data-chapter="8">
+      <img src="img/page-219.jpg" alt="Слайд 219" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-220" data-page="220" data-chapter="8">
+      <img src="img/page-220.jpg" alt="Слайд 220" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-221" data-page="221" data-chapter="8">
+      <img src="img/page-221.jpg" alt="Слайд 221" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-222" data-page="222" data-chapter="8">
+      <img src="img/page-222.jpg" alt="Слайд 222" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-223" data-page="223" data-chapter="8">
+      <img src="img/page-223.jpg" alt="Слайд 223" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-224" data-page="224" data-chapter="8">
+      <img src="img/page-224.jpg" alt="Слайд 224" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-225" data-page="225" data-chapter="8">
+      <img src="img/page-225.jpg" alt="Слайд 225" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-226" data-page="226" data-chapter="8">
+      <img src="img/page-226.jpg" alt="Слайд 226" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-227" data-page="227" data-chapter="8">
+      <img src="img/page-227.jpg" alt="Слайд 227" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-228" data-page="228" data-chapter="8">
+      <img src="img/page-228.jpg" alt="Слайд 228" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-229" data-page="229" data-chapter="8">
+      <img src="img/page-229.jpg" alt="Слайд 229" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-230" data-page="230" data-chapter="8">
+      <img src="img/page-230.jpg" alt="Слайд 230" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-231" data-page="231" data-chapter="8">
+      <img src="img/page-231.jpg" alt="Слайд 231" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-232" data-page="232" data-chapter="8">
+      <img src="img/page-232.jpg" alt="Слайд 232" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-233" data-page="233" data-chapter="8">
+      <img src="img/page-233.jpg" alt="Слайд 233" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-234" data-page="234" data-chapter="8">
+      <img src="img/page-234.jpg" alt="Слайд 234" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-235" data-page="235" data-chapter="8">
+      <img src="img/page-235.jpg" alt="Слайд 235" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-236" data-page="236" data-chapter="8">
+      <img src="img/page-236.jpg" alt="Слайд 236" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-237" data-page="237" data-chapter="8">
+      <img src="img/page-237.jpg" alt="Слайд 237" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-238" data-page="238" data-chapter="8">
+      <img src="img/page-238.jpg" alt="Слайд 238" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-239" data-page="239" data-chapter="8">
+      <img src="img/page-239.jpg" alt="Слайд 239" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-240" data-page="240" data-chapter="8">
+      <img src="img/page-240.jpg" alt="Слайд 240" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-241" data-page="241" data-chapter="8">
+      <img src="img/page-241.jpg" alt="Слайд 241" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-242" data-page="242" data-chapter="8">
+      <img src="img/page-242.jpg" alt="Слайд 242" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-243" data-page="243" data-chapter="8">
+      <img src="img/page-243.jpg" alt="Слайд 243" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-244" data-page="244" data-chapter="8">
+      <img src="img/page-244.jpg" alt="Слайд 244" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-245" data-page="245" data-chapter="8">
+      <img src="img/page-245.jpg" alt="Слайд 245" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-246" data-page="246" data-chapter="8">
+      <img src="img/page-246.jpg" alt="Слайд 246" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-247" data-page="247" data-chapter="8">
+      <img src="img/page-247.jpg" alt="Слайд 247" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-248" data-page="248" data-chapter="8">
+      <img src="img/page-248.jpg" alt="Слайд 248" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-249" data-page="249" data-chapter="8">
+      <img src="img/page-249.jpg" alt="Слайд 249" loading="lazy" draggable="false">
+    </section>
+    <section class="slide" id="page-250" data-page="250" data-chapter="-1">
+      <img src="img/page-250.jpg" alt="Слайд 250" loading="lazy" draggable="false">
+    </section>
+</div>
+</div>
+
+<div class="slidenav" id="slidenav">
+  <button id="prevSlide" aria-label="Предыдущий слайд">&#8249;</button>
+  <span class="slide-counter" id="slideCounter">1 / 250</span>
+  <button id="nextSlide" aria-label="Следующий слайд">&#8250;</button>
+</div>
+
+<script>
+(function() {
+  var N_PAGES = 175;
+  var CHAPTERS = [{"title": "Об агентстве", "start": 1}, {"title": "Фестивальные кейсы", "start": 10}, {"title": "FMCG", "start": 56}, {"title": "E-grocery", "start": 75}, {"title": "Non-food", "start": 123}];
+
+  function playInline(btn) {
+    var section = btn.closest('.slide');
+    if (!section || section.querySelector('.slide-video')) return;
+
+    var iframe = document.createElement('iframe');
+    iframe.className = 'slide-video';
+    iframe.src = btn.getAttribute('data-embed');
+    iframe.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media';
+    iframe.allowFullscreen = true;
+
+    // Vimeo letterboxes/pillarboxes a video whose native aspect ratio doesn't match our
+    // 16:9 slide. When we know the real aspect (baked in at build time), scale the iframe
+    // up and center it so the video content covers the full slide instead of showing bars.
+    var videoAspect = parseFloat(btn.getAttribute('data-aspect'));
+    if (videoAspect) {
+      var containerAspect = 16 / 9;
+      var scale = Math.max(containerAspect / videoAspect, videoAspect / containerAspect);
+      if (scale > 1.01 && scale <= 1.4) {
+        iframe.style.width = (scale * 100) + '%';
+        iframe.style.height = (scale * 100) + '%';
+        iframe.style.left = '50%';
+        iframe.style.top = '50%';
+        iframe.style.right = 'auto';
+        iframe.style.bottom = 'auto';
+        iframe.style.transform = 'translate(-50%, -50%)';
+      } else if (scale > 1.01) {
+        // too wide/narrow to crop safely: fit the iframe to the video so the bars are the
+        // slide's own black background, not the (white) empty canvas of the iframe.
+        iframe.style.left = '50%';
+        iframe.style.top = '50%';
+        iframe.style.right = 'auto';
+        iframe.style.bottom = 'auto';
+        iframe.style.transform = 'translate(-50%, -50%)';
+        if (videoAspect > containerAspect) {
+          iframe.style.height = (100 * containerAspect / videoAspect) + '%';
+        } else {
+          iframe.style.width = (100 * videoAspect / containerAspect) + '%';
+        }
+      }
+    }
+    section.style.background = '#000';
+    var slideImg = section.querySelector('img');
+    if (slideImg) slideImg.style.visibility = 'hidden';
+
+    var closeBtn = document.createElement('button');
+    closeBtn.className = 'slide-close';
+    closeBtn.setAttribute('aria-label', 'Закрыть видео');
+    closeBtn.innerHTML = '&times;';
+    closeBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      iframe.remove();
+      closeBtn.remove();
+      section.style.background = '';
+      if (slideImg) slideImg.style.visibility = '';
+      section.querySelectorAll('.hotspot').forEach(function(h) { h.style.visibility = ''; });
+    });
+
+    section.querySelectorAll('.hotspot').forEach(function(h) { h.style.visibility = 'hidden'; });
+    section.appendChild(iframe);
+    section.appendChild(closeBtn);
+  }
+
+  document.querySelectorAll('.hotspot-video').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      playInline(btn);
+    });
+  });
+
+  // scroll progress
+  var fill = document.getElementById('topbarFill');
+  function onScroll() {
+    var h = document.documentElement;
+    var scrolled = h.scrollTop;
+    var max = h.scrollHeight - h.clientHeight;
+    var pct = max > 0 ? (scrolled / max) * 100 : 0;
+    fill.style.width = pct + '%';
+  }
+  document.addEventListener('scroll', onScroll, {passive: true});
+  onScroll();
+
+  // active slide tracking via IntersectionObserver
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var chapterLinks = Array.prototype.slice.call(document.querySelectorAll('.chapter-link'));
+  var counterEl = document.getElementById('slideCounter');
+  var slidenav = document.getElementById('slidenav');
+  var prevBtn = document.getElementById('prevSlide');
+  var nextBtn = document.getElementById('nextSlide');
+  var currentIndex = 0;
+
+  function setActiveChapter(chapterIdx) {
+    chapterLinks.forEach(function(a) {
+      a.classList.toggle('active', parseInt(a.getAttribute('data-chapter-idx'), 10) === chapterIdx);
+    });
+  }
+
+  function updateCurrent(index) {
+    currentIndex = index;
+    var page = parseInt(slides[index].getAttribute('data-page'), 10);
+    counterEl.textContent = (index + 1) + ' / ' + slides.length;
+    setActiveChapter(parseInt(slides[index].getAttribute('data-chapter'), 10));
+    prevBtn.disabled = index <= 0;
+    nextBtn.disabled = index >= slides.length - 1;
+  }
+
+  var observer = new IntersectionObserver(function(entries) {
+    var best = null;
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        if (!best || entry.intersectionRatio > best.intersectionRatio) best = entry;
+      }
+    });
+    if (best) {
+      var idx = slides.indexOf(best.target);
+      if (idx !== -1) updateCurrent(idx);
+    }
+  }, { threshold: [0.25, 0.5, 0.75], rootMargin: '-64px 0px -20% 0px' });
+  slides.forEach(function(s) { observer.observe(s); });
+
+  function goTo(index) {
+    index = Math.max(0, Math.min(slides.length - 1, index));
+    slides[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  prevBtn.addEventListener('click', function() { goTo(currentIndex - 1); });
+  nextBtn.addEventListener('click', function() { goTo(currentIndex + 1); });
+
+  document.addEventListener('keydown', function(e) {
+    var tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); goTo(currentIndex + 1); }
+    else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); goTo(currentIndex - 1); }
+  });
+
+  var revealTimer = null;
+  window.addEventListener('scroll', function() {
+    slidenav.classList.add('visible');
+    clearTimeout(revealTimer);
+    revealTimer = setTimeout(function() { slidenav.classList.remove('visible'); }, 2200);
+  }, {passive: true});
+
+  updateCurrent(0);
+})();
+</script>
+
+</body>
+</html>
