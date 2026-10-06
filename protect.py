@@ -5,6 +5,8 @@ The password is only used to derive the key; it is never written to any file.
 Every slide image and the whole deck markup are encrypted (AES-256-GCM, PBKDF2-SHA256 key).
 """
 import base64
+import hashlib
+import hmac
 import json
 import os
 import re
@@ -29,27 +31,47 @@ js = re.search(r'<script>(.*?)</script>', src, re.S).group(1)
 body = src[src.index('<body>') + 6: src.index('<script>')].strip()
 title = re.search(r'<title>(.*?)</title>', src).group(1)
 
-salt = os.urandom(16)
-key = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=ITER).derive(password.encode('utf-8'))
+# The salt is not secret, but it is kept between builds so that unchanged slides encrypt to identical files.
+SALT_FILE = os.path.join(BASE, 'protect.salt')
+if os.path.exists(SALT_FILE):
+    salt = base64.b64decode(open(SALT_FILE).read().strip())
+else:
+    salt = os.urandom(16)
+    open(SALT_FILE, 'w').write(base64.b64encode(salt).decode())
+
+# 64 bytes: the first 32 are the AES key (identical to what the browser derives with length 256),
+# the next 32 are a MAC key used only to derive deterministic IVs.
+okm = PBKDF2HMAC(algorithm=hashes.SHA256(), length=64, salt=salt, iterations=ITER).derive(password.encode('utf-8'))
+key, mac_key = okm[:32], okm[32:]
 aes = AESGCM(key)
 
 
 def seal(data: bytes) -> bytes:
-    iv = os.urandom(12)
+    # IV = HMAC(plaintext): same input -> same output (so git sees no change), different input -> different IV
+    iv = hmac.new(mac_key, data, hashlib.sha256).digest()[:12]
     return iv + aes.encrypt(iv, data, None)  # iv | ciphertext | tag
 
 
-if os.path.isdir(OUT):
-    shutil.rmtree(OUT)
-os.makedirs(os.path.join(OUT, 'enc'))
+def write_if_changed(path, data: bytes):
+    if os.path.exists(path) and open(path, 'rb').read() == data:
+        return False
+    with open(path, 'wb') as f:
+        f.write(data)
+    return True
+
+
+os.makedirs(os.path.join(OUT, 'enc'), exist_ok=True)  # never wipe OUT: it may hold a .git folder
+fresh = set()
+changed = 0
 
 # images -> encrypted blobs drawn into <canvas> in the browser (no <img>, no file URLs)
 def to_canvas(m):
     name = os.path.splitext(os.path.basename(m.group(1)))[0]
     with open(os.path.join(BASE, m.group(1)), 'rb') as f:
         data = f.read()
-    with open(os.path.join(OUT, 'enc', name + '.bin'), 'wb') as f:
-        f.write(seal(data))
+    global changed
+    fresh.add(name + '.bin')
+    changed += write_if_changed(os.path.join(OUT, 'enc', name + '.bin'), seal(data))
     return (f'<canvas class="slide-canvas" width="1920" height="1080" data-src="enc/{name}.bin" '
             f'role="img" aria-label="{m.group(2)}"></canvas>')
 
@@ -65,6 +87,9 @@ shell = (shell.replace('%%TITLE%%', title)
          .replace('%%SALT%%', base64.b64encode(salt).decode())
          .replace('%%ITER%%', str(ITER))
          .replace('%%PAYLOAD%%', payload))
-open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8').write(shell)
-open(os.path.join(OUT, 'robots.txt'), 'w').write('User-agent: *\nDisallow: /\n')
-print('encrypted', len(os.listdir(os.path.join(OUT, 'enc'))), 'images ->', os.path.abspath(OUT))
+changed += write_if_changed(os.path.join(OUT, 'index.html'), shell.encode('utf-8'))
+write_if_changed(os.path.join(OUT, 'robots.txt'), b'User-agent: *\nDisallow: /\n')
+for f in os.listdir(os.path.join(OUT, 'enc')):  # drop slides that no longer exist
+    if f not in fresh:
+        os.remove(os.path.join(OUT, 'enc', f)); changed += 1
+print('slides:', len(fresh), '| files changed this run:', changed, '->', os.path.abspath(OUT))
