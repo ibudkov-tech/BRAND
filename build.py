@@ -42,7 +42,7 @@ PROJECTS = [
 ]
 
 
-def chapter_of(page):
+def project_of(page):
     for k, (start, end, _, _) in enumerate(PROJECTS):
         if start <= page <= end:
             return k
@@ -53,15 +53,16 @@ sections = []
 for p in range(1, N_PAGES + 1):
     if p in LOGO_ONLY:
         continue
-    k = chapter_of(p)
+    k = project_of(p)
+    ch = 0 if k >= 0 else -1
     sections.append(
-        f'    <section class="slide" id="page-{p}" data-page="{p}" data-chapter="{k}">\n'
+        f'    <section class="slide" id="page-{p}" data-page="{p}" data-chapter="{ch}">\n'
         f'      <img src="img/page-{p:03d}.jpg" alt="Слайд {p}" loading="lazy" draggable="false">\n'
         f'    </section>')
     # the description slide follows the numbered divider of each project
     if k >= 0 and p == PROJECTS[k][0]:
         sections.append(
-            f'    <section class="slide" id="desc-{k + 1:02d}" data-page="desc-{k + 1:02d}" data-chapter="{k}">\n'
+            f'    <section class="slide" id="desc-{k + 1:02d}" data-page="desc-{k + 1:02d}" data-chapter="0">\n'
             f'      <img src="img/desc-{k + 1:02d}.jpg" alt="Описание проекта {PROJECTS[k][2]}" loading="lazy" draggable="false">\n'
             f'    </section>')
 
@@ -70,18 +71,17 @@ def target_id(k, t):
     return f'desc-{k + 1:02d}' if t == 'desc' else f'page-{t}'
 
 
-nav = []
-for k, (start, _, client, items) in enumerate(PROJECTS):
-    subs = '\n          '.join(
-        f'<a href="#{target_id(k, t)}" class="chapter-sub-link">{label}</a>' for t, label in items)
-    nav.append(f'''<div class="chapter-item">
-      <a href="#page-{start}" class="chapter-link" data-chapter-idx="{k}">{client}</a>
+subs = '\n          '.join(
+    f'<a href="#page-{start}" class="chapter-sub-link"><span class="chapter-sub-client">{k + 1:02d}</span> {client}</a>'
+    for k, (start, _, client, _) in enumerate(PROJECTS))
+nav = [f'''<div class="chapter-item">
+      <a href="#page-{PROJECTS[0][0]}" class="chapter-link" data-chapter-idx="0">Бренд-платформа</a>
       <div class="chapter-dropdown">
         <div class="chapter-dropdown-inner">
           {subs}
         </div>
       </div>
-    </div>''')
+    </div>''']
 
 total = len(sections)
 html = f'''<!DOCTYPE html>
