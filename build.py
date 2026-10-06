@@ -49,20 +49,32 @@ def project_of(page):
     return -1
 
 
+ABOUT = list(range(2, 10))
+TEAM = list(range(11, 18))
+
+
+def about_section(n, ch):
+    return (f'    <section class="slide" id="about-{n:02d}" data-page="about-{n:02d}" data-chapter="{ch}">\n'
+            f'      <img src="img/about-{n:02d}.jpg" alt="Слайд {n}" loading="lazy" draggable="false">\n'
+            f'    </section>')
+
+
 sections = []
 for p in range(1, N_PAGES + 1):
     if p in LOGO_ONLY:
         continue
     k = project_of(p)
-    ch = 0 if k >= 0 else -1
+    ch = 2 if k >= 0 else -1
     sections.append(
         f'    <section class="slide" id="page-{p}" data-page="{p}" data-chapter="{ch}">\n'
         f'      <img src="img/page-{p:03d}.jpg" alt="Слайд {p}" loading="lazy" draggable="false">\n'
         f'    </section>')
+    if p == 1:  # about the agency and the team come right after the cover
+        sections += [about_section(n, 0) for n in ABOUT] + [about_section(n, 1) for n in TEAM]
     # the description slide follows the numbered divider of each project
     if k >= 0 and p == PROJECTS[k][0]:
         sections.append(
-            f'    <section class="slide" id="desc-{k + 1:02d}" data-page="desc-{k + 1:02d}" data-chapter="0">\n'
+            f'    <section class="slide" id="desc-{k + 1:02d}" data-page="desc-{k + 1:02d}" data-chapter="2">\n'
             f'      <img src="img/desc-{k + 1:02d}.jpg" alt="Описание проекта {PROJECTS[k][2]}" loading="lazy" draggable="false">\n'
             f'    </section>')
 
@@ -74,8 +86,10 @@ def target_id(k, t):
 subs = '\n          '.join(
     f'<a href="#page-{start}" class="chapter-sub-link"><span class="chapter-sub-client">{k + 1:02d}</span> {client}</a>'
     for k, (start, _, client, _) in enumerate(PROJECTS))
-nav = [f'''<div class="chapter-item">
-      <a href="#page-{PROJECTS[0][0]}" class="chapter-link" data-chapter-idx="0">Бренд-платформа</a>
+nav = [f'''<div class="chapter-item"><a href="#about-{ABOUT[0]:02d}" class="chapter-link" data-chapter-idx="0">Об агентстве</a></div>''',
+       f'''<div class="chapter-item"><a href="#about-{TEAM[0]:02d}" class="chapter-link" data-chapter-idx="1">Команда</a></div>''',
+       f'''<div class="chapter-item">
+      <a href="#page-{PROJECTS[0][0]}" class="chapter-link" data-chapter-idx="2">Бренд-платформы</a>
       <div class="chapter-dropdown">
         <div class="chapter-dropdown-inner">
           {subs}

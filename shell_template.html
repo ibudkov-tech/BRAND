@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>%%TITLE%%</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="data:,">
+<style>%%CSS%%
+  /* anti-save: no selecting, no touch-callout, nothing to print */
+  html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  .slide canvas.slide-canvas { width: 100%; height: 100%; display: block; pointer-events: none; }
+  @media print { html, body { display: none !important; } }
+  #shield { position: fixed; inset: 0; background: #000; z-index: 9999; display: none; }
+
+  /* password gate */
+  #gate { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: #0b0b0c; }
+  #gate form { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 14px; text-align: center; }
+  #gate .logo { font-weight: 700; letter-spacing: 0.06em; font-size: 14px; opacity: 0.9; margin-bottom: 8px; }
+  #gate input { -webkit-user-select: text; user-select: text; font: inherit; font-size: 15px; color: #fff; background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 13px 14px; outline: none; text-align: center; }
+  #gate input:focus { border-color: rgba(255,255,255,0.6); }
+  #gate button { font: inherit; font-size: 14px; color: #0b0b0c; background: #fff; border: 0; border-radius: 8px; padding: 12px 14px; cursor: pointer; }
+  #gate button:disabled { opacity: 0.5; cursor: default; }
+  #gate .err { min-height: 18px; font-size: 13px; color: #ff7b7b; }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <form id="gateForm" autocomplete="off">
+    <div class="logo">ТУТКОВБУДКОВ</div>
+    <input id="pw" type="password" placeholder="Пароль" autocomplete="off" autofocus aria-label="Пароль">
+    <button id="go" type="submit">Войти</button>
+    <div class="err" id="err" role="alert"></div>
+  </form>
+</div>
+<div id="app" hidden></div>
+<div id="shield"></div>
+
+<script>
+(function () {
+  var SALT = '%%SALT%%', ITER = %%ITER%%, PAYLOAD = '%%PAYLOAD%%';
+  var enc = new TextEncoder(), dec = new TextDecoder();
+  var b64 = function (s) { return Uint8Array.from(atob(s), function (c) { return c.charCodeAt(0); }); };
+  var toB64 = function (u) { var s = ''; u.forEach(function (c) { s += String.fromCharCode(c); }); return btoa(s); };
+
+  function deriveRaw(pw) {
+    return crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveBits']).then(function (k) {
+      return crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: b64(SALT), iterations: ITER }, k, 256);
+    }).then(function (bits) { return new Uint8Array(bits); });
+  }
+  function importKey(raw) { return crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']); }
+  function open(buf, key) {
+    var u = new Uint8Array(buf);
+    return crypto.subtle.decrypt({ name: 'AES-GCM', iv: u.slice(0, 12) }, key, u.slice(12));
+  }
+
+  function initDeck() {
+%%APPJS%%
+  }
+
+  /* ---- slides: fetch -> decrypt -> draw on canvas; far-away slides are released ---- */
+  function setupLoader(key) {
+    function load(c) {
+      if (c._st) return;
+      c._st = 1; var tok = c._tok = (c._tok || 0) + 1;
+      fetch(c.dataset.src).then(function (r) { return r.arrayBuffer(); })
+        .then(function (buf) { return open(buf, key); })
+        .then(function (plain) { return createImageBitmap(new Blob([plain], { type: 'image/jpeg' })); })
+        .then(function (bmp) {
+          if (c._tok !== tok || !c._st) { bmp.close(); return; }
+          c.width = 1920; c.height = 1080;
+          c.getContext('2d').drawImage(bmp, 0, 0, 1920, 1080);
+          bmp.close(); c._st = 2;
+        }).catch(function () { c._st = 0; });
+    }
+    function unload(c) {
+      if (!c._st) return;
+      c._tok = (c._tok || 0) + 1; c._st = 0; c.width = 1; c.height = 1;
+    }
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { e.isIntersecting ? load(e.target) : unload(e.target); });
+    }, { rootMargin: '250% 0px' });
+    document.querySelectorAll('canvas.slide-canvas').forEach(function (c) { c.width = 1; c.height = 1; io.observe(c); });
+  }
+
+  /* ---- deterrents (they raise the bar, they cannot make a screenshot impossible) ---- */
+  function shield() {
+    var s = document.getElementById('shield');
+    s.style.display = 'block';
+    try { navigator.clipboard.writeText(''); } catch (e) {}
+    setTimeout(function () { s.style.display = 'none'; }, 1500);
+  }
+  function setupGuards() {
+    ['contextmenu', 'dragstart', 'selectstart', 'copy', 'cut'].forEach(function (ev) {
+      document.addEventListener(ev, function (e) { e.preventDefault(); });
+    });
+    window.addEventListener('keydown', function (e) {
+      var k = (e.key || '').toLowerCase(), mod = e.ctrlKey || e.metaKey;
+      if (e.key === 'PrintScreen') { shield(); return; }
+      if (e.key === 'F12' || (mod && ['s', 'p', 'u', 'a'].indexOf(k) > -1) ||
+          (mod && e.shiftKey && ['i', 'j', 'c', 's'].indexOf(k) > -1)) {
+        e.preventDefault(); e.stopPropagation();
+      }
+    }, true);
+    window.addEventListener('keyup', function (e) { if (e.key === 'PrintScreen') shield(); });
+  }
+
+  function unlock(raw) {
+    return importKey(raw).then(function (key) {
+      return open(b64(PAYLOAD), key).then(function (plain) {
+        var app = document.getElementById('app');
+        app.innerHTML = dec.decode(plain);
+        document.getElementById('gate').remove();
+        app.hidden = false;
+        initDeck(); setupLoader(key); setupGuards();
+      });
+    });
+  }
+
+  var form = document.getElementById('gateForm'), pw = document.getElementById('pw'),
+      go = document.getElementById('go'), err = document.getElementById('err'), fails = 0;
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (!pw.value) return;
+    go.disabled = true; err.textContent = 'Проверяю…';
+    deriveRaw(pw.value).then(function (raw) {
+      return unlock(raw).then(function () {
+        try { sessionStorage.setItem('tbk', toB64(raw)); } catch (e) {}
+      });
+    }).catch(function () {
+      fails++; err.textContent = 'Неверный пароль';
+      pw.value = ''; setTimeout(function () { go.disabled = false; pw.focus(); }, Math.min(400 * fails, 3000));
+    });
+  });
+
+  if (!window.crypto || !crypto.subtle) {
+    err.textContent = 'Нужен https или localhost: браузер не даёт шифрование на этом адресе.';
+    go.disabled = true;
+  } else {
+    var saved = null;
+    try { saved = sessionStorage.getItem('tbk'); } catch (e) {}
+    if (saved) unlock(b64(saved)).catch(function () { try { sessionStorage.removeItem('tbk'); } catch (e) {} });
+  }
+})();
+</script>
+
+</body>
+</html>
